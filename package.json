@@ -1,0 +1,19 @@
+{
+  "name": "uno-online",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Multiplayer real-time Uno game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}
