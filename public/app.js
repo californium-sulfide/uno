@@ -7,6 +7,7 @@ const COLOR_SHORT = { red: '红', yellow: '黄', green: '绿', blue: '蓝' };
 const CARD_LABELS = { skip: 'Skip', reverse: 'Reverse', draw2: 'Draw Two', wild: 'Wild', wild4: 'Wild Draw Four' };
 const HAND_COLOR_ORDER = { red: 0, yellow: 1, green: 2, blue: 3 };
 const HAND_KIND_ORDER = { number: 0, skip: 1, reverse: 2, draw2: 3, wild: 4, wild4: 5 };
+const WILD_REVEAL_MS = 500;
 
 const ui = {
   room: null,
@@ -29,6 +30,7 @@ const ui = {
   lastHandIds: new Set(),
   lastTopCardId: null,
   lastDiscardRoundKey: null,
+  wildReveal: null,
   actionBusy: false,
   localUnoPending: false,
   roundMinimized: false,
@@ -184,7 +186,7 @@ function setNetworkState(mode) {
   for (const el of [$('net-status'),$('game-net-status')]) {
     if (!el) continue;
     el.className = `net-status${el.id === 'game-net-status' ? ' compact' : ''} ${cls}`.trim();
-    el.replaceChildren(node('i'), document.createTextNode(labels[mode]));
+    el.replaceChildren(node('i', 'net-dot'), document.createTextNode(labels[mode]));
   }
   ui.connected = mode === 'online';
 }
@@ -295,6 +297,11 @@ function clearForcedDrawTimer() {
   }
 }
 
+function clearWildReveal() {
+  if (ui.wildReveal?.timer) clearTimeout(ui.wildReveal.timer);
+  ui.wildReveal = null;
+}
+
 async function gameAction(event, payload = {}) {
   clearForcedDrawTimer();
   const now = Date.now();
@@ -338,6 +345,7 @@ function hideOverlaysForNoGame() {
   ui.pendingWildCardId = null;
   ui.colorContext = null;
   ui.localUnoPending = false;
+  clearWildReveal();
 }
 
 function applySession(code, playerId, token) {
@@ -946,7 +954,7 @@ function makeCard(card, options = {}) {
     center.append(node('span', 'wild-wheel'), node('span', 'wild-label', 'WILD'));
   } else {
     center.classList.add('wild-center', 'wild4-center');
-    center.append(node('span', 'wild-wheel'), node('span', 'wild-label', '+4'));
+    center.append(node('span', 'wild-wheel'), node('span', 'wild-label wild4-label', '+4'));
   }
   element.appendChild(center);
   return element;
@@ -1017,9 +1025,9 @@ function renderOpponents() {
     main.appendChild(nameLine);
 
     const tags = node('div', 'op-tags');
-    if (player.isHost) tags.append(node('span', 'tag host', '房主'));
-    if (player.isBot) tags.append(node('span', 'tag bot', '电脑'));
-    if (!player.connected) tags.append(node('span', 'tag offline', '离线'));
+    if (player.isHost) tags.append(node('span', 'tag op-tag host', '房主'));
+    if (player.isBot) tags.append(node('span', 'tag op-tag bot', '电脑'));
+    if (!player.connected) tags.append(node('span', 'tag op-tag offline', '离线'));
     if (player.uno) tags.append(node('span', 'uno-pill', 'UNO'));
     main.appendChild(tags);
 
@@ -1078,14 +1086,40 @@ function renderTableCenter() {
   if (ui.lastDiscardRoundKey !== discardRoundKey) {
     ui.lastDiscardRoundKey = discardRoundKey;
     ui.lastTopCardId = null;
+    clearWildReveal();
   }
   const topCardId = game.topCard?.id ?? null;
   const topCardChanged = Boolean(topCardId && ui.lastTopCardId && topCardId !== ui.lastTopCardId);
   if (game.topCard) {
     const cardElement = makeCard(game.topCard);
     if (topCardChanged) cardElement.classList.add('played-anim');
+    const isWild = game.topCard.kind === 'wild' || game.topCard.kind === 'wild4';
+    if (isWild && game.activeColor) {
+      cardElement.style.setProperty('--wild-color', COLOR_HEX[game.activeColor] || '#20262b');
+      let reveal = ui.wildReveal;
+      if (!reveal || reveal.cardId !== topCardId) {
+        clearWildReveal();
+        const delay = topCardChanged ? WILD_REVEAL_MS : 0;
+        reveal = { cardId: topCardId, revealAt: Date.now() + delay, timer: null };
+        ui.wildReveal = reveal;
+        if (delay > 0) {
+          reveal.timer = setTimeout(() => {
+            if (ui.wildReveal !== reveal) return;
+            reveal.timer = null;
+            const current = discard.querySelector('.card');
+            if (current?.dataset.cardId === reveal.cardId) {
+              current.classList.add('wild-colored');
+            }
+          }, delay);
+        }
+      }
+      if (Date.now() >= reveal.revealAt) cardElement.classList.add('wild-colored');
+    } else {
+      clearWildReveal();
+    }
     discard.appendChild(cardElement);
   } else {
+    clearWildReveal();
     discard.appendChild(node('span', 'empty-pile', '等待发牌'));
   }
   ui.lastTopCardId = topCardId;
@@ -1298,7 +1332,7 @@ function renderHand() {
 
   for (const card of myHand) {
     currentIds.add(card.id);
-    const extra = [];
+    const extra = ['hand-card'];
     if (snipeable.has(card.id)) extra.push('snipeable', 'playable');
     else if (followable.has(card.id)) extra.push('followable', 'playable');
     else if (playable.has(card.id)) extra.push('playable');

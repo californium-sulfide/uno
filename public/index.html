@@ -52,7 +52,7 @@
                   <p>成为房主，可自由设置规则。</p>
                   <label class="create-visibility" for="create-public">
                     <input type="checkbox" id="create-public" />
-                    <span>公开房间 <small>在游戏大厅展示</small></span>
+                    <span>公开房间 <small class="visibility-hint">在游戏大厅展示</small></span>
                   </label>
                   <button class="win-btn primary wide" type="submit" id="create-btn">创建房间</button>
                 </form>
@@ -120,33 +120,33 @@
                 </div>
                 <div class="rules-list" id="rules-list">
                   <label class="rule-row">
-                    <input type="checkbox" id="config-stack" />
+                    <input type="checkbox" id="config-stack" class="rule-input" />
                     <span class="switch-ui" aria-hidden="true"></span>
-                    <span>
-                      <strong>叠加罚抽</strong>
-                      <small>+2 可接 +2 / +4；+4 可接 +4</small>
+                    <span class="rule-copy">
+                      <strong class="rule-label">叠加罚抽</strong>
+                      <small class="rule-desc">+2 可接 +2 / +4；+4 可接 +4</small>
                     </span>
                   </label>
                   <label class="rule-row" id="wild4-draw2-row">
-                    <input type="checkbox" id="config-wild4-draw2" />
+                    <input type="checkbox" id="config-wild4-draw2" class="rule-input" />
                     <span class="switch-ui" aria-hidden="true"></span>
-                    <span>
-                      <strong>+4 后允许 +2</strong>
-                      <small>在 +4 的罚抽链上允许接 +2</small>
+                    <span class="rule-copy">
+                      <strong class="rule-label">+4 后允许 +2</strong>
+                      <small class="rule-desc">在 +4 的罚抽链上允许接 +2</small>
                     </span>
                   </label>
                   <label class="rule-row">
-                    <input type="checkbox" id="config-force" />
+                    <input type="checkbox" id="config-force" class="rule-input" />
                     <span class="switch-ui" aria-hidden="true"></span>
-                    <span>
-                      <strong>抽到能出为止</strong>
-                      <small>选择抽牌后连续抽到能出并打出，不能结束回合</small>
+                    <span class="rule-copy">
+                      <strong class="rule-label">抽到能出为止</strong>
+                      <small class="rule-desc">选择抽牌后连续抽到能出并打出，不能结束回合</small>
                     </span>
                   </label>
                   <div class="rule-select-row">
-                    <label for="config-sniping">
-                      <strong>抢出规则</strong>
-                      <small>5 秒窗口，同牌可抢先打出</small>
+                    <label class="rule-copy" for="config-sniping">
+                      <strong class="rule-label">抢出规则</strong>
+                      <small class="rule-desc">5 秒窗口，同牌可抢先打出</small>
                     </label>
                     <select id="config-sniping" class="win-select">
                       <option value="off">关闭抢出</option>
@@ -185,7 +185,7 @@
             <div class="round-pill">我的积分 <strong id="game-score">0</strong></div>
           </div>
           <div class="toolbar-right">
-            <span class="net-status compact" id="game-net-status"><i></i>在线</span>
+            <span class="net-status compact" id="game-net-status"><i class="net-dot"></i>在线</span>
             <button class="win-btn subtle" id="game-leave" type="button">离开</button>
           </div>
         </div>
@@ -197,10 +197,10 @@
           <div class="table-center">
             <div class="table-surface">
               <div class="pile-block draw-block" id="draw-pile" role="button" tabindex="0" aria-label="从抽牌堆抽牌">
-                <div class="pile-cards card-back-mini-stack">
-                  <div class="card-back"></div>
-                  <div class="card-back"></div>
-                  <div class="card-back"></div>
+                <div class="pile-cards">
+                  <div class="card-back stacked-card-back"></div>
+                  <div class="card-back stacked-card-back"></div>
+                  <div class="card-back stacked-card-back"></div>
                 </div>
                 <span class="pile-caption">抽牌堆 <strong id="draw-count">0</strong></span>
               </div>
@@ -227,7 +227,7 @@
             <div class="direction-card meta-card">
               <span class="meta-label">出牌顺序</span>
               <div class="direction-visual">
-                <span class="direction-arrow" id="direction-arrow" aria-hidden="true"><svg viewBox="0 0 36 24"><path d="M3 12h27M21 4l9 8-9 8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <span class="direction-arrow" id="direction-arrow" aria-hidden="true"><svg class="direction-icon" viewBox="0 0 36 24"><path d="M3 12h27M21 4l9 8-9 8" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
               </div>
               <span class="direction-name" id="direction-name">顺时针</span>
             </div>
